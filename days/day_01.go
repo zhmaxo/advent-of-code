@@ -66,6 +66,24 @@ func (s *day1Solution) SolvePt1() (answer string, err error) {
 	return
 }
 
+func (s *day1Solution) SolvePt2() (answer string, err error) {
+	rightMap := countUniqueNumbers(s.rightList)
+	score := 0
+	for _, k := range s.leftList {
+		score += k * int(rightMap[k])
+	}
+	answer = Stringify(score)
+	return
+}
+
+func countUniqueNumbers(numbers []int) (result map[int]uint) {
+	result = make(map[int]uint, len(numbers))
+	for _, v := range numbers {
+		result[v]++
+	}
+	return
+}
+
 func dist(lhs, rhs int) uint {
 	biggest, smallest := lhs, rhs
 	if biggest < smallest {
