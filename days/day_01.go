@@ -6,16 +6,22 @@ import (
 )
 
 func init() {
-	DaySolutions[1] = WrapSolution(solve_day1)
+	DaySolutions[1] = &day1Solution{}
 }
 
-func solve_day1(reader ioReader) (answer string, err error) {
-	const bufSize = 1024
-	totalDist := uint(0)
-	lhs := make([]int, 0, bufSize)
-	rhs := make([]int, 0, bufSize)
+type day1Solution struct {
+	leftList, rightList []int
+}
 
-	size := 0
+func (s *day1Solution) HasData() bool {
+	return s.leftList != nil && s.rightList != nil
+}
+
+func (s *day1Solution) ReadData(reader ioReader) (err error) {
+	const bufSize = 1024
+	s.leftList = make([]int, 0, bufSize)
+	s.rightList = make([]int, 0, bufSize)
+
 	scanner := ProcessReader(reader)
 	hasLine := true
 	for hasLine {
@@ -32,17 +38,28 @@ func solve_day1(reader ioReader) (answer string, err error) {
 				return
 			}
 		}
-		lNum, rNum, err = UnpackNumbers2(string(line))
+		lNum, rNum, err = ParseNumbers2(string(line))
 		if err != nil {
 			return
 		}
-		lhs = append(lhs, lNum)
-		rhs = append(rhs, rNum)
-		size++
+		s.leftList = append(s.leftList, lNum)
+		s.rightList = append(s.rightList, rNum)
 	}
+	return
+}
+
+func (s *day1Solution) SolvePt1() (answer string, err error) {
+	totalDist := uint(0)
+	if !s.HasData() {
+		err = ErrNoData
+		return
+	}
+
+	lhs, rhs := s.leftList, s.rightList
+
 	sort.Ints(lhs)
 	sort.Ints(rhs)
-	for i := 0; i < size; i++ {
+	for i := 0; i < len(lhs); i++ {
 		totalDist += dist(lhs[i], rhs[i])
 	}
 	answer = Stringify(totalDist)

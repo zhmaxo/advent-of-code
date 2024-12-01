@@ -11,12 +11,32 @@ func TestDay1(t *testing.T) {
   3   3`
 
 	reader := StrToReader(testInput)
-	answer, err := solve_day1(reader)
+	// first part
+	s := day1Solution{}
+	err := s.ReadData(reader)
+	asserrt(t, err)
+
+	answer1, err := s.SolvePt1()
+	asserrt(t, err)
+
+	assert(t, answer1 == "11", "%v is incorrect test answer!", answer1)
+	t.Log("as expected")
+}
+
+func assert(t *testing.T, condition bool, failMsg string, args ...any) {
+	if !condition {
+		t.Fatalf(failMsg, args...)
+	}
+}
+
+func asserrt(t *testing.T, err error) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if answer != "11" {
-		t.Fatalf("%v is incorrect test answer!", answer)
+}
+
+func asserrtf(t *testing.T, err error, msg string) {
+	if err != nil {
+		t.Fatalf("%v:  %v", msg, err)
 	}
-	t.Log("as expected")
 }

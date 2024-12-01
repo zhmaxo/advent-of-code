@@ -28,7 +28,8 @@ func aoc2024Main() error {
 	}
 
 	const maxDayNumber = uint(25)
-	switch day := *dayNumber; {
+	day := *dayNumber
+	switch {
 	case day == 0:
 		return fmt.Errorf("you should specify non-zero day number")
 	case day > maxDayNumber:
@@ -40,13 +41,32 @@ func aoc2024Main() error {
 		if err != nil {
 			return err
 		}
+		defer reader.Close()
 
-		answer, err := days.DaySolutions[uint8(*dayNumber)](reader)
+		solution, ok := days.DaySolutions[uint8(day)]
+		if !ok {
+			err = fmt.Errorf("no day with number %v", day)
+			return err
+		}
+
+		err = solution.ReadData(reader)
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("answer: %v", answer)
+		answer1, err := solution.SolvePt1()
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("pt1 answer: %v\n", answer1)
+
+		answer2, err := solution.SolvePt2()
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("pt2 answer: %v\n", answer2)
 	} else {
 		println("no filename specified")
 	}

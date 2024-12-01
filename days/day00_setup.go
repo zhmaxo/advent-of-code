@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -13,34 +12,37 @@ import (
 type (
 	ioReader = io.Reader
 	ioCloser = io.Closer
-
-	daySolutionFunc = func(ioReader) (answer string, err error)
 )
 
-var DaySolutions map[uint8]daySolutionFunc
+type Solution interface {
+	HasData() bool
+	ReadData(reader ioReader) (err error)
+	SolvePt1() (string, error)
+	SolvePt2() (string, error)
+}
+
+var (
+	DaySolutions map[uint8]Solution
+
+	ErrNoData = fmt.Errorf("no data prepared!")
+)
 
 func init() {
-	DaySolutions = make(map[uint8]daySolutionFunc, 25)
+	DaySolutions = make(map[uint8]Solution, 25)
 }
 
 func StrToReader(input string) ioReader {
 	return strings.NewReader(input)
 }
 
-func ReadFile(filename string) (reader ioReader, err error) {
-	file, err := os.Open(filename)
+func ReadFile(filename string) (file *os.File, err error) {
+	file, err = os.Open(filename)
 	return file, err
 }
 
-func WrapSolution(solution daySolutionFunc) daySolutionFunc {
-	return func(reader ioReader) (string, error) {
-		defer func() {
-			if closer, ok := reader.(ioCloser); ok {
-				log.Printf("close ioCloser %v", reader)
-				closer.Close()
-			}
-		}()
-		return solution(reader)
+func CloseIfCan(reader ioReader) {
+	if closer, ok := reader.(ioCloser); ok {
+		closer.Close()
 	}
 }
 
@@ -49,7 +51,7 @@ func ProcessReader(reader ioReader) (scanner bufio.Reader) {
 	return
 }
 
-func UnpackNumbers2(value string) (n1, n2 int, err error) {
+func ParseNumbers2(value string) (n1, n2 int, err error) {
 	const mustLen = 2
 
 	unpacked := strings.Fields(value)
