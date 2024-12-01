@@ -4,14 +4,12 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"os"
 	"strconv"
 	"strings"
 )
 
 type (
 	ioReader = io.Reader
-	ioCloser = io.Closer
 )
 
 type Solution interface {
@@ -29,21 +27,6 @@ var (
 
 func init() {
 	DaySolutions = make(map[uint8]Solution, 25)
-}
-
-func StrToReader(input string) ioReader {
-	return strings.NewReader(input)
-}
-
-func ReadFile(filename string) (file *os.File, err error) {
-	file, err = os.Open(filename)
-	return file, err
-}
-
-func CloseIfCan(reader ioReader) {
-	if closer, ok := reader.(ioCloser); ok {
-		closer.Close()
-	}
 }
 
 func ProcessReader(reader ioReader) (scanner bufio.Reader) {

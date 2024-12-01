@@ -1,6 +1,9 @@
 package days
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestDay1(t *testing.T) {
 	testInput := `3   4
@@ -10,7 +13,7 @@ func TestDay1(t *testing.T) {
   3   9
   3   3`
 
-	reader := StrToReader(testInput)
+	reader := strings.NewReader(testInput)
 	// first part
 	s := day1Solution{}
 	err := s.ReadData(reader)

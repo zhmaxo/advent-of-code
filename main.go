@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"zhmaxo/advent-of-code-2024/days"
 )
@@ -16,59 +17,72 @@ func main() {
 }
 
 func aoc2024Main() error {
+	day, file, err := getCliArgs()
+	if err != nil {
+		return err
+	}
+
+	reader, err := getCurrentInputReader(day, file)
+	if err != nil {
+		return err
+	}
+	defer reader.Close()
+
+	solution, ok := days.DaySolutions[uint8(day)]
+	if !ok {
+		err = fmt.Errorf("no day with number %v", day)
+		return err
+	}
+
+	err = solution.ReadData(reader)
+	if err != nil {
+		return err
+	}
+
+	answer1, err := solution.SolvePt1()
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("pt1 answer: %v\n", answer1)
+
+	answer2, err := solution.SolvePt2()
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("pt2 answer: %v\n", answer2)
+	return nil
+}
+
+func getCliArgs() (day uint, file string, err error) {
 	dayNumber := flag.Uint("day", 0, "specify day to solve")
 	filename := flag.String("file", "", "specify input filename here")
 	flag.Parse()
 
 	switch {
-	case dayNumber == nil:
-		fallthrough
-	case filename == nil:
-		return fmt.Errorf("unexpected nil flag values")
+	case dayNumber == nil, filename == nil:
+		err = fmt.Errorf("unexpected nil flag values")
+		return
 	}
+
+	file = *filename
+	day = *dayNumber
 
 	const maxDayNumber = uint(25)
-	day := *dayNumber
 	switch {
 	case day == 0:
-		return fmt.Errorf("you should specify non-zero day number")
+		err = fmt.Errorf("you should specify non-zero day number")
 	case day > maxDayNumber:
-		return fmt.Errorf("day number cannot be more than %v (get %v)", maxDayNumber, dayNumber)
+		err = fmt.Errorf("day number cannot be more than %v (get %v)", maxDayNumber, dayNumber)
 	}
+	return
+}
 
-	if *filename != "" {
-		reader, err := days.ReadFile(*filename)
-		if err != nil {
-			return err
-		}
-		defer reader.Close()
-
-		solution, ok := days.DaySolutions[uint8(day)]
-		if !ok {
-			err = fmt.Errorf("no day with number %v", day)
-			return err
-		}
-
-		err = solution.ReadData(reader)
-		if err != nil {
-			return err
-		}
-
-		answer1, err := solution.SolvePt1()
-		if err != nil {
-			return err
-		}
-
-		fmt.Printf("pt1 answer: %v\n", answer1)
-
-		answer2, err := solution.SolvePt2()
-		if err != nil {
-			return err
-		}
-
-		fmt.Printf("pt2 answer: %v\n", answer2)
-	} else {
-		println("no filename specified")
+func getCurrentInputReader(day uint, file string) (io.ReadCloser, error) {
+	if file != "" {
+		return os.Open(file)
 	}
-	return nil
+	// TODO: http get input via API
+	return nil, fmt.Errorf("cant get input reader for day %v", day)
 }
