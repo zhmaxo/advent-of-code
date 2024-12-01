@@ -1,0 +1,6 @@
+@year=2024
+@day=1
+GET https://adventofcode.com/{{year}}/day/{{day}}/input
+Cookie: session={{SESSION_TOKEN}}
+
+>>! .input
