@@ -14,7 +14,6 @@ func TestDay1(t *testing.T) {
   3   3`
 
 	reader := strings.NewReader(testInput)
-	// first part
 	s := day1Solution{}
 	err := s.ReadData(reader)
 	asserrt(t, err)
@@ -26,6 +25,24 @@ func TestDay1(t *testing.T) {
 	answer2, err := s.SolvePt2()
 	asserrt(t, err)
 	assert(t, answer2 == "31", "%v is incorrect part2 test answer", answer2)
+}
+
+func TestDay2(t *testing.T) {
+	testInput := `7 6 4 2 1
+  1 2 7 8 9
+  9 7 6 2 1
+  1 3 2 4 5
+  8 6 4 4 1
+  1 3 6 7 9`
+
+	reader := strings.NewReader(testInput)
+	s := day2Solution{}
+	err := s.ReadData(reader)
+	asserrt(t, err)
+
+	answer1, err := s.SolvePt1()
+	asserrt(t, err)
+	assert(t, answer1 == "2", "%v is incorrect part1 test answer!", answer1)
 }
 
 func assert(t *testing.T, condition bool, failMsg string, args ...any) {
