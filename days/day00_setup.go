@@ -22,6 +22,7 @@ type Solution interface {
 var (
 	DaySolutions map[uint8]Solution
 
+	ErrEOF    = io.EOF
 	ErrNoData = fmt.Errorf("no data prepared!")
 )
 
@@ -30,7 +31,21 @@ func init() {
 }
 
 func ProcessReader(reader ioReader) (scanner bufio.Reader) {
-	scanner = *bufio.NewReaderSize(reader, 10)
+	scanner = *bufio.NewReaderSize(reader, 64)
+	return
+}
+
+func ParseNumbers(value string) (result []int, err error) {
+	unpacked := strings.Fields(value)
+	result = make([]int, 0, len(unpacked))
+	num := 0
+	for _, v := range unpacked {
+		num, err = strconv.Atoi(v)
+		if err != nil {
+			return
+		}
+		result = append(result, num)
+	}
 	return
 }
 
