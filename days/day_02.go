@@ -63,6 +63,18 @@ func (s *day2Solution) SolvePt1() (answer string, err error) {
 }
 
 func (s *day2Solution) SolvePt2() (answer string, err error) {
+	safeReports := 0
+	const bufSize = 10
+	for _, report := range s.reports {
+		safe := isReportSafe(report)
+		for i := 0; i < len(report) && !safe; i++ {
+			safe = isReportSafeSkipLevel(report, i)
+		}
+		if safe {
+			safeReports++
+		}
+	}
+	answer = Stringify(safeReports)
 	return
 }
 
@@ -80,6 +92,42 @@ func isReportSafe(report []int) bool {
 		}
 
 		if dist(report[i], report[i+1]) > maxDiff {
+			return false
+		}
+	}
+	return true
+}
+
+func isReportSafeSkipLevel(report []int, skipIdx int) bool {
+	const maxDiff = 3
+
+	var prevTrend reportTrend
+	initialIdx := 0
+	if skipIdx == 0 {
+		initialIdx = 1
+	}
+	lastIdx := len(report) - 1
+	if lastIdx == skipIdx {
+		// avoid index out of range
+		lastIdx--
+	}
+	for i := 0; i < lastIdx; i++ {
+		if skipIdx == i {
+			continue
+		}
+		nextIdx := i + 1
+		if nextIdx == skipIdx {
+			nextIdx++
+		}
+		nextTrend := getReportTrend(report[i], report[nextIdx])
+		if i == initialIdx {
+			prevTrend = nextTrend
+		}
+		if nextTrend == RepTrend_Eq || nextTrend != prevTrend {
+			return false
+		}
+
+		if dist(report[i], report[nextIdx]) > maxDiff {
 			return false
 		}
 	}
