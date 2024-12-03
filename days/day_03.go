@@ -85,13 +85,16 @@ func d3_read(reader ioReader) (muls groupedMuls, err error) {
 			// no need to search smth else because the line contains only 1 of ')'
 			continue
 		}
+		// search index of mul-opening pattern: 'mul('
 		openSubstrIdx := strings.LastIndex(string(line), string(openBytes))
 		if openSubstrIdx < 0 || openSubstrIdx > len(line)-2 {
 			continue
 		}
+		// extract info between '(' and ')'. expected content like "[0-9]*,[0-9]*"
 		args := line[openSubstrIdx+len(openBytes) : len(line)-1]
 		sepIdx := slices.Index(args, ',')
 		if sepIdx < 1 {
+			// no separator, so nothing to multiply
 			continue
 		}
 		instr := parsedMul{}
@@ -108,6 +111,7 @@ func d3_read(reader ioReader) (muls groupedMuls, err error) {
 	}
 
 	if err == ErrEOF {
+		// EOF is a legal finish case, not really error
 		err = nil
 	}
 	return
@@ -188,6 +192,7 @@ func d3_readWithRegexp(reader ioReader) (muls map[exprGroup][]parsedMul, err err
 	}
 
 	if err == ErrEOF {
+		// EOF is a legal finish case, not really error
 		err = nil
 	}
 
