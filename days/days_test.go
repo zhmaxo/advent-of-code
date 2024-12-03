@@ -28,7 +28,7 @@ var testCases = map[uint8]testCase{
   1 3 6 7 9`, "2", "4"),
 
 	3: batchTestCase(`xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))`,
-		"161", ""),
+		"161", "48"),
 }
 
 func batchTestCase(input, expect1, expect2 string) testCase {
@@ -56,7 +56,7 @@ func TestDays(t *testing.T) {
 
 		answer2, err := sol.SolvePt2()
 		asserrt(t, err)
-		assert(t, answer2 == tc.expect2, "%v is incorrect part1 test answer!", answer2)
+		assert(t, answer2 == tc.expect2, "%v is incorrect part2 test answer!", answer2)
 	}
 }
 
