@@ -47,10 +47,11 @@ func pf(f string, a ...any) {
 func d3_read(reader ioReader) (muls groupedMuls, err error) {
 	const (
 		startCacheSize = 512
-		openToken      = "mul("
-		closeToken     = ')'
-		enableInstr    = "do()"
-		disableInstr   = "don't()"
+		// ')' is common char for end of all declared instructions
+		closeToken   = ')'
+		openToken    = "mul("
+		enableInstr  = "do()"
+		disableInstr = "don't()"
 	)
 
 	openBytes := []byte(openToken)
@@ -62,26 +63,12 @@ func d3_read(reader ioReader) (muls groupedMuls, err error) {
 	muls[EG_Disabled] = make([]parsedMul, 0, startCacheSize)
 	sc := ProcessReader(reader)
 
-	// prevSkipped := false
-	// lastSkipReason := ""
 	currentGroup := EG_Enabled
 	for err == nil {
-		// if prevSkipped {
-		// 	pf("skip")
-		// 	switch lastSkipReason {
-		// 	case "":
-		// 		pf("\n")
-		// 	default:
-		// 		pf(" (%v)\n", lastSkipReason)
-		// 	}
-		// }
-		// prevSkipped = true
-		// lastSkipReason = ""
 		var line []byte
 		var groupChanged bool
-		line, err = sc.ReadSlice(')')
-		// pf("check line %q: ", line)
-		// change currentGroup only if opposite instruction found
+		line, err = sc.ReadSlice(closeToken)
+		// check group changers. change group only if opposite changer found
 		switch currentGroup {
 		case EG_Enabled:
 			if endsWith(line, disableBytes) {
@@ -95,35 +82,28 @@ func d3_read(reader ioReader) (muls groupedMuls, err error) {
 			}
 		}
 		if groupChanged {
-			// prevSkipped = false
-			// pf("[group changed to %v]\n", currentGroup)
+			// no need to search smth else because the line contains only 1 of ')'
 			continue
 		}
 		openSubstrIdx := strings.LastIndex(string(line), string(openBytes))
 		if openSubstrIdx < 0 || openSubstrIdx > len(line)-2 {
-			// lastSkipReason = fmt.Sprintf("len not match (osi=%v)", openSubstrIdx)
 			continue
 		}
 		args := line[openSubstrIdx+len(openBytes) : len(line)-1]
 		sepIdx := slices.Index(args, ',')
 		if sepIdx < 1 {
-			// lastSkipReason = fmt.Sprintf("sep not found in %q", args)
 			continue
 		}
 		instr := parsedMul{}
 		var parseErr error // should be ignored by loop
 		instr.lhs, parseErr = strconv.Atoi(string(args[:sepIdx]))
 		if parseErr != nil {
-			// lastSkipReason = fmt.Sprintf("can't parse %q", args[:sepIdx])
 			continue
 		}
 		instr.rhs, parseErr = strconv.Atoi(string(args[sepIdx+1:]))
 		if parseErr != nil {
-			// lastSkipReason = fmt.Sprintf("can't parse %q", args[sepIdx+1:])
 			continue
 		}
-		// prevSkipped = false
-		// pf("parsed %v\n", instr)
 		muls[currentGroup] = append(muls[currentGroup], instr)
 	}
 
@@ -139,21 +119,16 @@ func endsWith(line, ending []byte) bool {
 }
 
 func substrIdx(line, substr []byte) (idx int) {
-	// no substr len check because of trust to myself)
 	idx = slices.Index(line, substr[0])
 	if idx < 0 {
-		// pf("not found %q in %q", substr[0], line)
 		return
 	}
 	endIdx := idx + len(substr)
 	if endIdx >= len(line) {
-		// pf("not match line stats: len(%q)=%v, idx=%v, len(%q)=%v",
-		// 	line, len(line), idx, substr, len(substr))
 		idx = -1
 		return
 	}
 	if !bytes.Equal(line[idx:endIdx], substr) {
-		// pf("%q != %q", line[idx:endIdx], substr)
 		idx = -1
 	}
 	return
@@ -162,6 +137,7 @@ func substrIdx(line, substr []byte) (idx int) {
 func d3_readWithRegexp(reader ioReader) (muls map[exprGroup][]parsedMul, err error) {
 	const (
 		startCacheSize = 512
+		// ')' is common char for end of all declared instructions
 		closeToken     = ')'
 		mulPattern     = `mul\(([0-9]*),([0-9]*)\)`
 		enablePattern  = `do\(\)`
@@ -180,7 +156,7 @@ func d3_readWithRegexp(reader ioReader) (muls map[exprGroup][]parsedMul, err err
 	currentGroup := EG_Enabled
 	for err == nil {
 		var line []byte
-		line, err = sc.ReadSlice(')')
+		line, err = sc.ReadSlice(closeToken)
 		// change currentGroup only if opposite instruction found
 		switch currentGroup {
 		case EG_Enabled:
