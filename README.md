@@ -26,7 +26,7 @@ parameterization of the day and input.
 - [x] Get input via API (see ./advent.http)
 - [x] Single entry-point
 - [x] Dynamic solution usage
-- [ ] Dynamic testing without new test func every single day
+- [x] Dynamic testing without new test func every single day
 - [ ] Load input from adventofcode.com using session token
 - [ ] Simple HTTP server
 - [ ] Multi-year support
