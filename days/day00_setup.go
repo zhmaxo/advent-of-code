@@ -31,7 +31,7 @@ func init() {
 }
 
 func ProcessReader(reader ioReader) (scanner bufio.Reader) {
-	scanner = *bufio.NewReaderSize(reader, 64)
+	scanner = *bufio.NewReader(reader)
 	return
 }
 
