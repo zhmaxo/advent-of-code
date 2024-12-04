@@ -42,24 +42,16 @@ func (s *day4Solution) ReadData(reader ioReader) (err error) {
 			for i := range idxs {
 				idxs[i] = Stringify(i)
 			}
-			// fmt.Printf(" |%v\n", strings.Join(idxs, ""))
-			// fmt.Println(strings.Repeat("-", len(line)+2))
 		} else if s.columnSize != len(line) {
 			err = fmt.Errorf("columns count mismatch: expected %v but actually %v (%q)",
 				s.columnSize, len(line), line)
 			break
 		}
-		// fmt.Printf("%v|%s\n", len(s.charTable), line)
-		fmt.Printf("%s\n", line)
+		// remember that line returned from ReadLine valid until next ReadLine call
+		// see [bufio.Reader.ReadLine] method description
 		l := make([]byte, len(line))
 		copy(l, line)
 		s.charTable = append(s.charTable, l)
-	}
-	fmt.Println("")
-	printTable(s.charTable, 0, 0, len(s.charTable), s.columnSize)
-	fmt.Println("")
-	for _, l := range s.charTable {
-		fmt.Printf("%s\n", l)
 	}
 
 	if err == ErrEOF {
@@ -94,8 +86,44 @@ func (s *day4Solution) SolvePt1() (answer string, err error) {
 	return
 }
 
+func (s *day4Solution) SolvePt2() (answer string, err error) {
+	checkBytes := []byte("MAS")
+	centerIdx := 1
+	matchesCount := 0
+	availableDirs := []seekDir{back, forth}
+	for i, line := range s.charTable {
+		for j, ch := range line {
+			if ch != checkBytes[centerIdx] {
+				continue
+			}
+			inBlockMatches := 0
+			for _, vdir := range availableDirs {
+				l := i - vdir*centerIdx
+				for _, hdir := range availableDirs {
+					c := j - hdir*centerIdx
+					if hasMatch(s.charTable, checkBytes, hdir, vdir, l, c) {
+						inBlockMatches++
+					}
+				}
+			}
+			// only 2 matches counts
+			// not working properly if we're checking palindrome but we're not)
+			if inBlockMatches == 2 {
+				matchesCount++
+			}
+		}
+	}
+	answer = Stringify(matchesCount)
+	return
+}
+
 func hasMatch(table [][]byte, value []byte, hdir, vdir seekDir, l, c int) bool {
-	cachedL, cachedC := l, c
+	if !isValidIdx(l, table) {
+		return false
+	}
+	if !isValidIdx(c, table[l]) {
+		return false
+	}
 	for i, ch := range value {
 		check := table[l][c]
 		if ch != check {
@@ -114,7 +142,6 @@ func hasMatch(table [][]byte, value []byte, hdir, vdir seekDir, l, c int) bool {
 			return false
 		}
 	}
-	fmt.Printf("found %q in ({%v,%v}-{%v,%v})\n", value, cachedL, cachedC, l, c)
 	return true
 }
 
@@ -123,14 +150,14 @@ func isValidIdx[T any](idx int, slice []T) bool {
 }
 
 func printTable(table [][]byte, lSince, cSince, vcount, hcount int) {
-	if lSince >= len(table) {
+	if lSince < 0 || lSince >= len(table) {
 		return
 	}
 	lBefore := lSince + vcount
 	if lBefore >= len(table) {
 		lBefore = len(table)
 	}
-	if cSince >= len(table[lSince]) {
+	if cSince < 0 || cSince >= len(table[lSince]) {
 		return
 	}
 	cBefore := cSince + hcount

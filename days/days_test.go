@@ -40,7 +40,7 @@ SMSMSASXSS
 SAXAMASAAA
 MAMMMXMMMM
 MXMXAXMASX`,
-		"18", ""),
+		"18", "9"),
 }
 
 func batchTestCase(input, expect1, expect2 string) testCase {
