@@ -23,7 +23,7 @@ const (
 )
 
 func (s *day4Solution) HasData() bool {
-	return true
+	return len(s.charTable) > 0 && len(s.charTable[0]) == s.columnSize
 }
 
 func (s *day4Solution) ReadData(reader ioReader) (err error) {
