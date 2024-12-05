@@ -1,6 +1,9 @@
 package days
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 func init() {
 	DaySolutions[5] = &day5Solution{}
@@ -81,6 +84,30 @@ func (s *day5Solution) SolvePt1() (answer string, err error) {
 }
 
 func (s *day5Solution) SolvePt2() (answer string, err error) {
+	result := 0
+	for _, u := range s.updates {
+		isMatch := true
+		for _, r := range s.rules {
+			if !r.matches(u) {
+				isMatch = false
+				break
+			}
+		}
+		if !isMatch {
+			// sort pages
+			sort.SliceStable(u.pages, func(i, j int) bool {
+				for _, r := range s.rules {
+					if r.compare(u.pages[i], u.pages[j]) > 0 {
+						return false
+					}
+				}
+				return true
+			})
+			fmt.Printf("sorted pages: %v", u.pages)
+			result += u.pages[len(u.pages)/2]
+		}
+	}
+	answer = Stringify(result)
 	return
 }
 
@@ -103,6 +130,17 @@ func (r pageOrderingRule) matches(update pageUpdate) bool {
 		}
 	}
 	return true
+}
+
+func (r pageOrderingRule) compare(p1, p2 int) int {
+	if p1 == r.pFirst && p2 == r.pSecond {
+		return -1
+	}
+	if p1 == r.pSecond && p2 == r.pFirst {
+		// that ordering breaks the rule
+		return 1
+	}
+	return 0
 }
 
 type pageUpdate struct {

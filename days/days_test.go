@@ -69,7 +69,7 @@ MXMXAXMASX`,
 75,29,13
 75,97,47,61,53
 61,13,29
-97,13,75,29,47`, "143", ""),
+97,13,75,29,47`, "143", "123"),
 }
 
 func batchTestCase(input, expect1, expect2 string) testCase {
