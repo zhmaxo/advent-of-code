@@ -103,7 +103,6 @@ func (s *day5Solution) SolvePt2() (answer string, err error) {
 				}
 				return true
 			})
-			fmt.Printf("sorted pages: %v", u.pages)
 			result += u.pages[len(u.pages)/2]
 		}
 	}
@@ -117,12 +116,10 @@ type pageOrderingRule struct {
 
 func (r pageOrderingRule) matches(update pageUpdate) bool {
 	pSecondOccured := false
-	for i, v := range update.pages {
+	for _, v := range update.pages {
 		switch v {
 		case r.pFirst:
 			if pSecondOccured {
-				fmt.Printf("%v failed rule %v|%v at %v\n",
-					update.pages, r.pFirst, r.pSecond, i)
 				return false
 			}
 		case r.pSecond:
