@@ -6,6 +6,7 @@ import (
 	"io"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 type (
@@ -36,7 +37,15 @@ func ProcessReader(reader ioReader) (scanner bufio.Reader) {
 }
 
 func ParseNumbers(value string) (result []int, err error) {
-	unpacked := strings.Fields(value)
+	return ParseNumbersFunc(value, unicode.IsSpace)
+}
+
+func ParseNumbersSep(value string, sep rune) (result []int, err error) {
+	return ParseNumbersFunc(value, func(r rune) bool { return r == sep })
+}
+
+func ParseNumbersFunc(value string, f func(rune) bool) (result []int, err error) {
+	unpacked := strings.FieldsFunc(value, f)
 	result = make([]int, 0, len(unpacked))
 	num := 0
 	for _, v := range unpacked {
