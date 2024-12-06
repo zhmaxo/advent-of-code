@@ -69,15 +69,8 @@ func (s *day6Solution) SolvePt1() (answer string, err error) {
 	f := s.field // copy to not change original values
 	for f.actorPos.within(f.width, f.height) {
 		visited[f.actorPos] = struct{}{}
-		result := f.tick()
-		switch result.action {
-		case turn:
-			fmt.Printf("step to %v\n", f.actorPos)
-		case step:
-			fmt.Printf("turn to %v\n", dirNames[f.actorDir])
-		}
+		_ = f.tick()
 	}
-	fmt.Printf("visited positions: %v\n", visited)
 	answer = Stringify(len(visited))
 	return
 }
