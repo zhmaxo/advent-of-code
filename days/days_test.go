@@ -80,7 +80,7 @@ MXMXAXMASX`,
 .#..^.....
 ........#.
 #.........
-......#...`, "41", ""),
+......#...`, "41", "6"),
 }
 
 func batchTestCase(input, expect1, expect2 string) testCase {

@@ -76,6 +76,38 @@ func (s *day6Solution) SolvePt1() (answer string, err error) {
 }
 
 func (s *day6Solution) SolvePt2() (answer string, err error) {
+	const startSize = 512
+	obstaclesToLoop := make(map[posInt]any, 32)
+	visited := make(map[posInt]map[posInt]any, startSize)
+
+	f := s.field // copy to not change original values
+	for f.actorPos.within(f.width, f.height) {
+		possibleToLoop := false
+		possibleRotated := f.actorDir.rotateRight()
+		p := f.actorPos
+		for p.within(f.width, f.height) {
+			if vps, ok := visited[p]; ok {
+				if _, wasHere := vps[possibleRotated]; wasHere {
+					possibleToLoop = true
+				}
+			}
+			p = p.add(possibleRotated)
+		}
+		if vps, ok := visited[f.actorPos]; ok {
+			vps[f.actorDir] = struct{}{}
+		} else {
+			dirs := map[posInt]any{
+				f.actorDir: struct{}{},
+			}
+			visited[f.actorPos] = dirs
+		}
+		result := f.tick()
+		if possibleToLoop && result.action == step {
+			fmt.Printf("set obstacle in %v to loop\n", f.actorPos)
+			obstaclesToLoop[f.actorPos] = struct{}{}
+		}
+	}
+	answer = Stringify(len(obstaclesToLoop))
 	return
 }
 
