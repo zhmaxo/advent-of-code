@@ -76,23 +76,13 @@ func (s *day6Solution) SolvePt1() (answer string, err error) {
 }
 
 func (s *day6Solution) SolvePt2() (answer string, err error) {
-	const startSize = 512
-	obstaclesToLoop := make(map[posInt]any, 32)
+	const startSize = 2048
 	visited := make(map[posInt]map[posInt]any, startSize)
+	obstaclesToLoop := make(map[posInt]any, startSize/8)
 
 	f := s.field // copy to not change original values
 	for f.actorPos.within(f.width, f.height) {
-		possibleToLoop := false
-		possibleRotated := f.actorDir.rotateRight()
-		p := f.actorPos
-		for p.within(f.width, f.height) {
-			if vps, ok := visited[p]; ok {
-				if _, wasHere := vps[possibleRotated]; wasHere {
-					possibleToLoop = true
-				}
-			}
-			p = p.add(possibleRotated)
-		}
+		willRetIfObstacle := willReturnToPrevPath(f, visited)
 		if vps, ok := visited[f.actorPos]; ok {
 			vps[f.actorDir] = struct{}{}
 		} else {
@@ -102,11 +92,12 @@ func (s *day6Solution) SolvePt2() (answer string, err error) {
 			visited[f.actorPos] = dirs
 		}
 		result := f.tick()
-		if possibleToLoop && result.action == step {
-			fmt.Printf("set obstacle in %v to loop\n", f.actorPos)
+		if willRetIfObstacle && result.action == step {
+			// fmt.Printf("set obstacle in %v to loop\n", f.actorPos)
 			obstaclesToLoop[f.actorPos] = struct{}{}
 		}
 	}
+	// fmt.Printf("possible obstacles: %v", obstaclesToLoop)
 	answer = Stringify(len(obstaclesToLoop))
 	return
 }
@@ -158,15 +149,66 @@ type tickResult struct {
 }
 
 func (f *field) tick() (result tickResult) {
-	nextPos := f.actorPos.add(f.actorDir)
-	if _, ok := f.obstacles[nextPos]; ok {
-		result.action = turn
+	f.actorPos, f.actorDir, result.action = simulateTick(
+		f.actorPos, f.actorDir, f.obstacles)
+	return
+}
+
+func simulateTick(pos, dir posInt, obstacles map[posInt]any,
+) (nextPos, nextDir posInt, action actionKind) {
+	nextPos, nextDir = pos, dir
+	checkPos := pos.add(dir)
+	if _, ok := obstacles[checkPos]; ok {
+		action = turn
 		// do turn
-		f.actorDir = f.actorDir.rotateRight()
+		nextDir = dir.rotateRight()
 	} else {
-		result.action = step
+		action = step
 		// do step
-		f.actorPos = nextPos
+		nextPos = checkPos
 	}
 	return
+}
+
+func wasSavedSameState(pos, dir posInt, m map[posInt]map[posInt]any) bool {
+	prevDirs, isVisited := m[pos]
+	if !isVisited {
+		return false
+	}
+
+	if _, sameDir := prevDirs[dir]; sameDir {
+		return true
+	}
+	return false
+}
+
+func willReturnToPrevPath(f field, visited map[posInt]map[posInt]any) bool {
+	simulatelyVisited := make(map[posInt]map[posInt]any, 256)
+	pos, dir := f.actorPos, f.actorDir
+	// what if we turn now
+	dir = dir.rotateRight()
+	var action actionKind
+	for pos.within(f.width, f.height) {
+		pos, dir, action = simulateTick(pos, dir, f.obstacles)
+		if action != step {
+			if simulatelyVisited[pos] == nil {
+				simulatelyVisited[pos] = make(map[posInt]any, 1)
+			}
+			simulatelyVisited[pos][dir] = struct{}{}
+			continue
+		}
+		//
+		if wasSavedSameState(pos, dir, visited) {
+			return true
+		}
+		if wasSavedSameState(pos, dir, simulatelyVisited) {
+			// loop to way without returning to prev, only imagined
+			return true
+		}
+		if simulatelyVisited[pos] == nil {
+			simulatelyVisited[pos] = make(map[posInt]any, 1)
+		}
+		simulatelyVisited[pos][dir] = struct{}{}
+	}
+	return false
 }
