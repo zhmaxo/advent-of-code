@@ -36,6 +36,13 @@ func ProcessReader(reader ioReader) (scanner bufio.Reader) {
 	return
 }
 
+func RefineError(readerResultErr error) error {
+	if readerResultErr == ErrEOF {
+		return nil
+	}
+	return readerResultErr
+}
+
 func ParseNumbers(value string) (result []int, err error) {
 	return ParseNumbersFunc(value, unicode.IsSpace)
 }
