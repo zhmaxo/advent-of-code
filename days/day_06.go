@@ -203,7 +203,7 @@ func willReturnToPrevPath(f field, visited map[posInt]map[posInt]any) bool {
 		}
 		if wasSavedSameState(pos, dir, simulatelyVisited) {
 			// loop to way without returning to prev, only imagined
-			return true
+			return false
 		}
 		if simulatelyVisited[pos] == nil {
 			simulatelyVisited[pos] = make(map[posInt]any, 1)
