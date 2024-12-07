@@ -53,8 +53,8 @@ func (s *day6Solution) ReadData(reader ioReader) (err error) {
 		s.field.height++
 	}
 
-	fmt.Printf("field {w:%v,h:%v} actor: %v, %v; obstacles: %v\n",
-		s.field.width, s.field.height, s.field.actorPos, s.field.actorDir, s.field.obstacles)
+	// fmt.Printf("field {w:%v,h:%v} actor: %v, %v; obstacles: %v\n",
+	// 	s.field.width, s.field.height, s.field.actorPos, s.field.actorDir, s.field.obstacles)
 
 	if err == ErrEOF {
 		err = nil
