@@ -56,7 +56,7 @@ func (s *day7Solution) SolvePt1() (answer string, err error) {
 		// fmt.Printf("check equation: %v = %v\n", c.testValue, c.numbers)
 		if foundMatch, comb := couldBeTrue(c.testValue, c.numbers); foundMatch {
 			result += int(c.testValue)
-			fmt.Printf("found combination: %v\n", stringifyOperators(c.numbers, comb))
+			fmt.Printf("%v = %v\n", c.testValue, stringifyOperators_bin(c.numbers, comb))
 		}
 	}
 	answer = Stringify(result)
@@ -69,9 +69,9 @@ func (s *day7Solution) SolvePt2() (answer string, err error) {
 		// fmt.Printf("check equation: %v = %v\n", c.testValue, c.numbers)
 		if foundMatch, comb := couldBeTrue_3ops(c.testValue, c.numbers); foundMatch {
 			result += int(c.testValue)
-			// fmt.Printf("found combination: %q\n", comb)
+			fmt.Printf("%v = %v\n", c.testValue, stringifyOperators(c.numbers, comb))
 			if slices.Index(comb, '|') >= 0 {
-				fmt.Printf("+ %v ", c.testValue)
+				// fmt.Printf("+ %v ", c.testValue)
 			}
 		}
 	}
@@ -125,7 +125,6 @@ func couldBeTrue_3ops(testNum uint64, nums []int) (result bool, combination []by
 		combination[i] = '+'
 	}
 	for i := 0; i <= totalCombinations; i++ {
-		// use bits as sequence of +/* cells
 		checkResult := uint64(nums[0])
 		for j, n := range nums[1:] {
 			opCode := combination[j]
@@ -181,8 +180,8 @@ func increment(ops []byte) {
 	}
 }
 
-func stringifyOperators(nums []int, combination int) string {
-	resultOps := make([]rune, len(nums)-1)
+func stringifyOperators_bin(nums []int, combination int) string {
+	resultOps := make([]byte, len(nums)-1)
 	for i := 0; i < int(len(resultOps)); i++ {
 		opCode := (combination >> i) & 0b1
 		switch opCode {
@@ -192,13 +191,17 @@ func stringifyOperators(nums []int, combination int) string {
 			resultOps[i] = '*'
 		}
 	}
+	return stringifyOperators(nums, resultOps)
+}
+
+func stringifyOperators(nums []int, resultOps []byte) string {
 	strWithNums := make([]string, len(nums))
 	for i, n := range nums {
-		op := ' '
+		op := ""
 		if i < int(len(resultOps)) {
-			op = resultOps[i]
+			op = string(rune(resultOps[i]))
 		}
-		strWithNums[i] = fmt.Sprintf("%v%v", n, string(op))
+		strWithNums[i] = fmt.Sprintf("%v%v", n, op)
 	}
 	return strings.Join(strWithNums, "")
 }
