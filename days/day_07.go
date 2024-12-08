@@ -21,7 +21,7 @@ type calibrationEntry struct {
 }
 
 func (s *day7Solution) HasData() bool {
-	return true
+	return len(s.calibrations) > 0
 }
 
 func (s *day7Solution) ReadData(reader ioReader) (err error) {

@@ -11,7 +11,7 @@ type day6Solution struct {
 }
 
 func (s *day6Solution) HasData() bool {
-	return true
+	return len(s.field.obstacles) > 0
 }
 
 func (s *day6Solution) ReadData(reader ioReader) (err error) {
