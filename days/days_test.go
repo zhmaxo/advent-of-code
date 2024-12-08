@@ -90,7 +90,7 @@ MXMXAXMASX`,
 161011: 16 10 13
 192: 17 8 14
 21037: 9 7 18 13
-292: 11 6 16 20`, "3749", ""),
+292: 11 6 16 20`, "3749", "11387"),
 }
 
 func batchTestCase(input, expect1, expect2 string) testCase {

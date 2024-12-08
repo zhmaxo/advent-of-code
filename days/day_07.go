@@ -53,7 +53,7 @@ func (s *day7Solution) ReadData(reader ioReader) (err error) {
 func (s *day7Solution) SolvePt1() (answer string, err error) {
 	result := 0
 	for _, c := range s.calibrations {
-		fmt.Printf("check equation: %v = %v\n", c.testValue, c.numbers)
+		// fmt.Printf("check equation: %v = %v\n", c.testValue, c.numbers)
 		if foundMatch, comb := couldBeTrue(c.testValue, c.numbers); foundMatch {
 			result += int(c.testValue)
 			fmt.Printf("found combination: %v\n", stringifyOperators(c.numbers, comb))
@@ -64,6 +64,18 @@ func (s *day7Solution) SolvePt1() (answer string, err error) {
 }
 
 func (s *day7Solution) SolvePt2() (answer string, err error) {
+	result := 0
+	for _, c := range s.calibrations {
+		// fmt.Printf("check equation: %v = %v\n", c.testValue, c.numbers)
+		if foundMatch, comb := couldBeTrue_3ops(c.testValue, c.numbers); foundMatch {
+			result += int(c.testValue)
+			// fmt.Printf("found combination: %q\n", comb)
+			if slices.Index(comb, '|') >= 0 {
+				fmt.Printf("+ %v ", c.testValue)
+			}
+		}
+	}
+	answer = Stringify(result)
 	return
 }
 
@@ -99,6 +111,74 @@ func couldBeTrue(ctlNumber uint64, nums []int) (result bool, combCode int) {
 		}
 	}
 	return
+}
+
+func couldBeTrue_3ops(testNum uint64, nums []int) (result bool, combination []byte) {
+	const opMask = 0b1
+	totalCombinations := 1
+	for range nums {
+		totalCombinations *= 3
+	}
+	totalCombinations /= 3
+	combination = make([]byte, len(nums)-1)
+	for i := range combination {
+		combination[i] = '+'
+	}
+	for i := 0; i <= totalCombinations; i++ {
+		// use bits as sequence of +/* cells
+		checkResult := uint64(nums[0])
+		for j, n := range nums[1:] {
+			opCode := combination[j]
+			switch opCode {
+			case 0:
+				fallthrough
+			case '+':
+				// sum
+				checkResult += uint64(n)
+			case '*':
+				// multiply
+				checkResult *= uint64(n)
+			case '|':
+				conc := fmt.Sprintf("%v%v", checkResult, n)
+				newRes, err := strconv.ParseUint(conc, 10, 64)
+				if err != nil {
+					panic("impossible error: " + err.Error())
+				}
+				checkResult = newRes
+			}
+			if checkResult == testNum && j == int(len(combination)-1) {
+				result = true
+				return
+			}
+			if checkResult > testNum {
+				// no sense to check that combination further
+				break
+			}
+		}
+		increment(combination)
+	}
+	return
+}
+
+func increment(ops []byte) {
+	for i, op := range ops {
+		shouldIncNext := false
+		switch op {
+		case 0:
+			fallthrough
+		case '+':
+			ops[i] = '*'
+		case '*':
+			ops[i] = '|'
+		case '|':
+			ops[i] = '+'
+			// only when overflow
+			shouldIncNext = true
+		}
+		if !shouldIncNext {
+			break
+		}
+	}
 }
 
 func stringifyOperators(nums []int, combination int) string {
