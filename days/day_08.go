@@ -62,6 +62,30 @@ func (s *day8Solution) SolvePt1() (answer string, err error) {
 }
 
 func (s *day8Solution) SolvePt2() (answer string, err error) {
+	antinodes := make(map[posInt]any, s.totalAntennas)
+	for _, ag := range s.antennas {
+		if len(ag) < 2 {
+			continue
+		}
+		for i := 0; i < len(ag); i++ {
+			antinodes[ag[i]] = well
+			for j := i + 1; j < len(ag); j++ {
+				dir1 := ag[i].sub(ag[j])
+				an1 := ag[i].add(dir1)
+				for an1.within(s.width, s.height) {
+					antinodes[an1] = well
+					an1 = an1.add(dir1)
+				}
+				dir2 := ag[j].sub(ag[i])
+				an2 := ag[j].add(dir2)
+				for an2.within(s.width, s.height) {
+					antinodes[an2] = well
+					an2 = an2.add(dir2)
+				}
+			}
+		}
+	}
+	answer = Stringify(len(antinodes))
 	return
 }
 
