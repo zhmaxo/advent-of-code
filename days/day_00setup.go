@@ -25,6 +25,8 @@ var (
 
 	ErrEOF    = io.EOF
 	ErrNoData = fmt.Errorf("no data prepared!")
+
+	well = struct{}{}
 )
 
 func init() {
