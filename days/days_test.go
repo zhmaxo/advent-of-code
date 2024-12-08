@@ -114,6 +114,13 @@ func batchTestCase(input, expect1, expect2 string) testCase {
 	}
 }
 
+func TestUtils(t *testing.T) {
+	p1, p2 := posInt{2, 5}, posInt{3, 1}
+	assert(t, p1.add(p2).eq(posInt{5, 6}),
+		"unexpected result %v + %v = %v (expected %v)",
+		p1, p2, p1.add(p2), posInt{5, 6})
+}
+
 func TestDays(t *testing.T) {
 	for d, tc := range testCases {
 		sol, ok := DaySolutions[d]
@@ -127,11 +134,13 @@ func TestDays(t *testing.T) {
 
 		answer1, err := sol.SolvePt1()
 		asserrt(t, err)
-		assert(t, answer1 == tc.expect1, "%v is incorrect part1 test answer!", answer1)
+		assert(t, answer1 == tc.expect1,
+			"%v is incorrect d%vp1 test answer!", answer1, d)
 
 		answer2, err := sol.SolvePt2()
 		asserrt(t, err)
-		assert(t, answer2 == tc.expect2, "%v is incorrect part2 test answer!", answer2)
+		assert(t, answer2 == tc.expect2,
+			"%v is incorrect d%vp2 test answer!", answer2, d)
 	}
 }
 
