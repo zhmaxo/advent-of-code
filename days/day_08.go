@@ -46,12 +46,7 @@ func (s *day8Solution) SolvePt1() (answer string, err error) {
 	antinodes := make(map[posInt]any, s.totalAntennas)
 	for _, ag := range s.antennas {
 		for i := 0; i < len(ag); i++ {
-			for j := 1; j < len(ag); j++ {
-				if j <= i {
-					// already checked or the same
-					continue
-				}
-
+			for j := i + 1; j < len(ag); j++ {
 				an1, an2 := findAntinodes(ag[i], ag[j])
 				if an1.within(s.width, s.height) {
 					antinodes[an1] = well
