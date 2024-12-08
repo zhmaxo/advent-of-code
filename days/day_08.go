@@ -6,8 +6,8 @@ func init() {
 
 type day8Solution struct {
 	antennas map[byte][]posInt
-	// field sizes
-	width, height int
+	area     rect
+
 	totalAntennas int
 }
 
@@ -27,8 +27,7 @@ func (s *day8Solution) ReadData(reader ioReader) (err error) {
 		if err != nil {
 			break
 		}
-		s.width = len(line)
-		y := s.height
+		y := s.area.size.y
 		for i, v := range line {
 			if v == '.' {
 				continue
@@ -37,7 +36,8 @@ func (s *day8Solution) ReadData(reader ioReader) (err error) {
 			s.antennas[v] = append(s.antennas[v], posInt{x, y})
 			s.totalAntennas++
 		}
-		s.height++
+		s.area.size.x = len(line)
+		s.area.size.y++
 	}
 	return
 }
@@ -48,10 +48,10 @@ func (s *day8Solution) SolvePt1() (answer string, err error) {
 		for i := 0; i < len(ag); i++ {
 			for j := i + 1; j < len(ag); j++ {
 				an1, an2 := findAntinodes(ag[i], ag[j])
-				if an1.within(s.width, s.height) {
+				if s.area.contains(an1) {
 					antinodes[an1] = well
 				}
-				if an2.within(s.width, s.height) {
+				if s.area.contains(an2) {
 					antinodes[an2] = well
 				}
 			}
@@ -72,13 +72,13 @@ func (s *day8Solution) SolvePt2() (answer string, err error) {
 			for j := i + 1; j < len(ag); j++ {
 				dir1 := ag[i].sub(ag[j])
 				an1 := ag[i].add(dir1)
-				for an1.within(s.width, s.height) {
+				for s.area.contains(an1) {
 					antinodes[an1] = well
 					an1 = an1.add(dir1)
 				}
 				dir2 := ag[j].sub(ag[i])
 				an2 := ag[j].add(dir2)
-				for an2.within(s.width, s.height) {
+				for s.area.contains(an2) {
 					antinodes[an2] = well
 					an2 = an2.add(dir2)
 				}

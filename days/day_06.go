@@ -31,7 +31,7 @@ func (s *day6Solution) ReadData(reader ioReader) (err error) {
 			break
 		}
 		for i, ch := range line {
-			x, y := i, s.field.height
+			x, y := i, s.field.rect.size.y
 			switch ch {
 			case '.':
 			// just empty position
@@ -49,8 +49,8 @@ func (s *day6Solution) ReadData(reader ioReader) (err error) {
 			}
 		}
 		// TODO: check consistency
-		s.field.width = len(line)
-		s.field.height++
+		s.field.rect.size.x = len(line)
+		s.field.rect.size.y++
 	}
 
 	// fmt.Printf("field {w:%v,h:%v} actor: %v, %v; obstacles: %v\n",
@@ -67,7 +67,7 @@ func (s *day6Solution) SolvePt1() (answer string, err error) {
 	visited := make(map[posInt]any, startSize)
 
 	f := s.field // copy to not change original values
-	for f.actorPos.within(f.width, f.height) {
+	for f.rect.contains(f.actorPos) {
 		visited[f.actorPos] = struct{}{}
 		_ = f.tick()
 	}
@@ -81,7 +81,7 @@ func (s *day6Solution) SolvePt2() (answer string, err error) {
 	obstaclesToLoop := make(map[posInt]any, startSize/8)
 
 	f := s.field // copy to not change original values
-	for f.actorPos.within(f.width, f.height) {
+	for f.rect.contains(f.actorPos) {
 		willRetIfObstacle := willReturnToPrevPath(f, visited)
 		if vps, ok := visited[f.actorPos]; ok {
 			vps[f.actorDir] = struct{}{}
@@ -107,7 +107,7 @@ type field struct {
 	actorPos  posInt
 	actorDir  posInt
 
-	height, width int
+	rect rect
 }
 
 var dirNames = map[posInt]string{
@@ -168,7 +168,7 @@ func willReturnToPrevPath(f field, visited map[posInt]map[posInt]any) bool {
 	// what if we turn now
 	dir = dir.rotateRight()
 	var action actionKind
-	for pos.within(f.width, f.height) {
+	for f.rect.contains(pos) {
 		pos, dir, action = simulateTick(pos, dir, f.obstacles)
 		if action != step {
 			if simulatelyVisited[pos] == nil {
