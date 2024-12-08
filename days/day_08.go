@@ -1,0 +1,77 @@
+package days
+
+func init() {
+	DaySolutions[8] = &day8Solution{}
+}
+
+type day8Solution struct {
+	antennas map[byte][]posInt
+	// field sizes
+	width, height int
+	totalAntennas int
+}
+
+func (s *day8Solution) HasData() bool {
+	return len(s.antennas) > 0
+}
+
+func (s *day8Solution) ReadData(reader ioReader) (err error) {
+	const startSize = 64
+	s.antennas = make(map[byte][]posInt, startSize)
+
+	defer func() { err = RefineError(err) }()
+	sc := ProcessReader(reader)
+	var line []byte
+	for err == nil {
+		line, _, err = sc.ReadLine()
+		if err != nil {
+			break
+		}
+		s.width = len(line)
+		y := s.height
+		for i, v := range line {
+			if v == '.' {
+				continue
+			}
+			x := i
+			s.antennas[v] = append(s.antennas[v], posInt{x, y})
+			s.totalAntennas++
+		}
+		s.height++
+	}
+	return
+}
+
+func (s *day8Solution) SolvePt1() (answer string, err error) {
+	antinodes := make(map[posInt]any, s.totalAntennas)
+	for _, ag := range s.antennas {
+		for i := 0; i < len(ag); i++ {
+			for j := 1; j < len(ag); j++ {
+				if j <= i {
+					// already checked or the same
+					continue
+				}
+
+				an1, an2 := findAntinodes(ag[i], ag[j])
+				if an1.within(s.width, s.height) {
+					antinodes[an1] = well
+				}
+				if an2.within(s.width, s.height) {
+					antinodes[an2] = well
+				}
+			}
+		}
+	}
+	answer = Stringify(len(antinodes))
+	return
+}
+
+func (s *day8Solution) SolvePt2() (answer string, err error) {
+	return
+}
+
+func findAntinodes(a1, a2 posInt) (an1, an2 posInt) {
+	dir1 := a1.sub(a2)
+	dir2 := a2.sub(a1)
+	return a1.add(dir1), a2.add(dir2)
+}
