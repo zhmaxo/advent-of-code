@@ -11,13 +11,17 @@ type day9Solution struct {
 	spaces []memBlock
 }
 
+// represents sequence of memory positions
+// uses for store spaces info and ordered files
+type memBlock struct {
+	start, length uint
+}
+
+// represents any memory sequence that stores moved file chunk
+// NOTE: there's no info about wholeness and whatever else
 type fileBlock struct {
 	memBlock
 	fileID uint
-}
-
-type memBlock struct {
-	start, length uint
 }
 
 func (mb memBlock) checksum(fileID uint) uint {
@@ -66,38 +70,41 @@ func (s *day9Solution) ReadData(reader ioReader) (err error) {
 
 func (s *day9Solution) SolvePt1() (answer string, err error) {
 	checkSum := uint64(0)
-	curSpc := 0
-	curMvFile := len(s.files) - 1
-	for blockID := range s.files {
-		mb := &s.files[blockID]
-		pf("check file %v; move target %v\n", blockID, curMvFile)
-		// seems like sane conversion
-		fileID := uint(blockID)
-		if blockID >= curMvFile {
-			for len(s.spaces) > curSpc && s.spaces[curSpc].start < mb.start && blockID == curMvFile {
-				mvRes := memmove(s.files, s.spaces, &curMvFile, &curSpc)
-				if mvRes.length > 0 {
-					checkSum += uint64(mvRes.checksum(fileID))
-				}
-				pf("%v > %v && %v < %v && %v == %v\n",
-					len(s.spaces), curSpc, s.spaces[curSpc].start, fileID, blockID, curMvFile)
-			}
-			// pf("%v > %v && %v < %v && %v == %v\n",
-			// 	len(s.spaces), curSpc, s.spaces[curSpc].start, fileID, blockID, curMvFile)
-			checkSum += uint64(s.files[blockID].checksum(fileID))
-			// collapse
+	// idOffset := 0
+	spaceOffset := 0
+
+	// TODO: copy before second part
+	files, spaces := s.files, s.spaces
+	movedFiles := make([]fileBlock, 0, len(s.files))
+	// move each file from last to first
+	for i := len(files) - 1; i > 0 && spaceOffset < len(spaces); {
+		if spaces[spaceOffset].start > files[i].start {
 			break
-		} else {
-			// keep count
-			checkSum += uint64(mb.checksum(fileID))
-			// cache mv file id
-			fileID = uint(curMvFile)
-			mvRes := memmove(s.files, s.spaces, &curMvFile, &curSpc)
-			if mvRes.length > 0 {
-				checkSum += uint64(mvRes.checksum(fileID))
-			}
+		}
+		moveFileID := uint(i)
+		fileid := &i
+		var movedBlock memBlock
+		movedBlock, _ = memmove(files, spaces, fileid, &spaceOffset)
+		if movedBlock.length > 0 {
+			movedFiles = append(movedFiles, fileBlock{movedBlock, moveFileID})
 		}
 	}
+
+	pf("begin counting regular files checksum:\n")
+	for i, mb := range files {
+		if mb.length == 0 {
+			break
+		}
+
+		fileID := uint(i)
+		checkSum += uint64(mb.checksum(fileID))
+	}
+
+	pf("begin counting moved files checksum:\n")
+	for _, fb := range movedFiles {
+		checkSum += uint64(fb.checksum(fb.fileID))
+	}
+	// pf("check file %v; move target %v\n", blockID, curMvFile)
 	answer = Stringify(checkSum)
 	return
 }
@@ -106,7 +113,7 @@ func (s *day9Solution) SolvePt2() (answer string, err error) {
 	return
 }
 
-func memmove(files, spaces []memBlock, fileid, spaceid *int) (mvResult memBlock) {
+func memmove(files, spaces []memBlock, fileid, spaceid *int) (mvResult memBlock, spcused int) {
 	curspcid := *spaceid
 	curmvfid := *fileid
 	if curspcid < len(spaces) {
@@ -122,6 +129,7 @@ func memmove(files, spaces []memBlock, fileid, spaceid *int) (mvResult memBlock)
 			mvf.length = 0
 			curmvfid--
 		} else {
+			spcused = 1
 			mvResult = *spc
 			mvf.length -= spc.length
 			spc.length = 0
