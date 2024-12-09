@@ -75,7 +75,7 @@ func (s *day9Solution) SolvePt1() (answer string, err error) {
 		fileID := uint(blockID)
 		if blockID >= curMvFile {
 			for len(s.spaces) > curSpc && s.spaces[curSpc].start < mb.start && blockID == curMvFile {
-				mvRes := memMov(s.files, s.spaces, &curMvFile, &curSpc)
+				mvRes := memmove(s.files, s.spaces, &curMvFile, &curSpc)
 				if mvRes.length > 0 {
 					checkSum += uint64(mvRes.checksum(fileID))
 				}
@@ -92,7 +92,7 @@ func (s *day9Solution) SolvePt1() (answer string, err error) {
 			checkSum += uint64(mb.checksum(fileID))
 			// cache mv file id
 			fileID = uint(curMvFile)
-			mvRes := memMov(s.files, s.spaces, &curMvFile, &curSpc)
+			mvRes := memmove(s.files, s.spaces, &curMvFile, &curSpc)
 			if mvRes.length > 0 {
 				checkSum += uint64(mvRes.checksum(fileID))
 			}
@@ -106,7 +106,7 @@ func (s *day9Solution) SolvePt2() (answer string, err error) {
 	return
 }
 
-func memMov(files, spaces []memBlock, fileid, spaceid *int) (mvResult memBlock) {
+func memmove(files, spaces []memBlock, fileid, spaceid *int) (mvResult memBlock) {
 	curspcid := *spaceid
 	curmvfid := *fileid
 	if curspcid < len(spaces) {
