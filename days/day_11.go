@@ -78,31 +78,41 @@ func (s *day11Solution) blink(times int) (total uint64) {
 		},
 	}
 
-	srcBuf := make([]int, len(s.numbers), startSize)
-	copy(srcBuf, s.numbers)
-	dstBuf := make([]int, 0, startSize)
-	pf("%v\n", srcBuf)
-	for i := range times {
-		for _, n := range srcBuf {
-			changed := ruleSet.applyRules(n)
-			if i < 10 {
-				// pf("%v -> %v\n", n, changed)
-			}
-			dstBuf = append(dstBuf, changed...)
-		}
-		if i < 10 {
-			// pf("%v: %v\n", i+1, dstBuf)
-		}
-		srcBuf, dstBuf = dstBuf[:], srcBuf[:0]
+	srcBuf := s.numbers
+	for _, n := range srcBuf {
+		count := ruleSet.calculateResultSplitRecursive(n, times)
+		pf("%v by %v blinks splits to %v numbers\n", n, times, count)
+		total += count
 	}
-	total = uint64(len(srcBuf))
-	// pf("%v\n", total)
 	return
 }
 
 type ruleset struct {
 	fallbackRule func(num int) []int
 	rules        []func(num int) (result []int, isApplicable bool)
+}
+
+func (r ruleset) calculateResultSplitRecursive(n, times int) (result uint64) {
+	if times == 0 {
+		return 1
+	}
+	times--
+	changed := r.applyRules(n)
+	switch len(changed) {
+	case 1:
+		newNum := changed[0]
+		// pf("%v -> %v\n", n, newNum)
+		result += r.calculateResultSplitRecursive(newNum, times)
+	case 2:
+		n1, n2 := changed[0], changed[1]
+		// pf("%v -> %v | %v\n", n, n1, n2)
+		result += r.calculateResultSplitRecursive(n1, times)
+		result += r.calculateResultSplitRecursive(n2, times)
+	default:
+		pf("unexpected case\n")
+	}
+	// pf("in %v on top of %v blinks returning %v\n", n, times, result)
+	return
 }
 
 func (r ruleset) applyRules(num int) (result []int) {
