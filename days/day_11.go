@@ -38,49 +38,14 @@ func (s *day11Solution) SolvePt2() (answer string, err error) {
 	return
 }
 
-func (s *day11Solution) blink(times int) (total uint64) {
+func (s *day11Solution) blink(times uint) (total uint64) {
 	const startSize = 1024 * 1024
 
-	var defaultResBuf [2]int
-
-	ruleSet := ruleset{
-		rules: []func(num int) (result []int, isApplicable bool){
-			func(num int) (result []int, isApplicable bool) {
-				isApplicable = num == 0
-				if isApplicable {
-					defaultResBuf[0] = 1
-					result = defaultResBuf[:1]
-				}
-				return
-			},
-			func(num int) (result []int, isApplicable bool) {
-				digits := int(math.Log10(float64(num))) + 1
-				isApplicable = digits%2 == 0
-				if isApplicable {
-					pow10 := func(pow int) int {
-						res := 1
-						for range pow {
-							res *= 10
-						}
-						return res
-					}
-					splitter := pow10(digits / 2)
-					defaultResBuf[0] = num / splitter // left part
-					defaultResBuf[1] = num % splitter // right part
-					result = defaultResBuf[:]
-				}
-				return
-			},
-		},
-		fallbackRule: func(num int) []int {
-			defaultResBuf[0] = num * 2024
-			return defaultResBuf[:1]
-		},
-	}
+	ruleSet := newPlutostoneRuleset()
 
 	srcBuf := s.numbers
 	for _, n := range srcBuf {
-		count := ruleSet.calculateResultSplitRecursive(n, times)
+		count := ruleSet.calculateResultSplitRecursive(uint(n), times)
 		pf("%v by %v blinks splits to %v numbers\n", n, times, count)
 		total += count
 	}
@@ -88,46 +53,87 @@ func (s *day11Solution) blink(times int) (total uint64) {
 }
 
 type ruleset struct {
-	fallbackRule func(num int) []int
-	rules        []func(num int) (result []int, isApplicable bool)
+	fallbackRule func(num uint) uint
+	rules        []ruleProcFunc
 }
 
-func (r ruleset) calculateResultSplitRecursive(n, times int) (result uint64) {
+type (
+	ruleAppResult uint8
+	ruleProcFunc  func(num uint) (res ruleAppResult, n1 uint, n2 int)
+)
+
+const (
+	ruleres_na ruleAppResult = iota
+	ruleres_n1               // return 1 number
+	ruleres_n2               // result 2 numbers - splitted
+)
+
+func newPlutostoneRuleset() ruleset {
+	return ruleset{
+		rules: []ruleProcFunc{
+			ruleFor0, ruleForEvenDigits,
+		},
+		fallbackRule: defaultRule,
+	}
+}
+
+func ruleFor0(num uint) (res ruleAppResult, n1 uint, n2 int) {
+	switch num {
+	case 0:
+		res = ruleres_n1
+		n1 = 1
+	default:
+		res = ruleres_na
+	}
+	return
+}
+
+func ruleForEvenDigits(num uint) (res ruleAppResult, n1 uint, n2 int) {
+	digits := int(math.Log10(float64(num))) + 1
+	if digits%2 != 0 {
+		return
+	}
+	res = ruleres_n2
+	div := uint(pow(10, uint8(digits/2)))
+	n1, n2 = uint(num/div), int(num%div)
+	return
+}
+
+func defaultRule(num uint) uint {
+	const mul = 2024
+	return num * mul
+}
+
+func (r ruleset) calculateResultSplitRecursive(n, times uint) (result uint64) {
 	if times == 0 {
 		return 1
 	}
 	times--
-	changed := r.applyRules(n)
-	switch len(changed) {
-	case 1:
-		newNum := changed[0]
-		// pf("%v -> %v\n", n, newNum)
-		result += r.calculateResultSplitRecursive(newNum, times)
-	case 2:
-		n1, n2 := changed[0], changed[1]
-		// pf("%v -> %v | %v\n", n, n1, n2)
-		result += r.calculateResultSplitRecursive(n1, times)
-		result += r.calculateResultSplitRecursive(n2, times)
-	default:
-		pf("unexpected case\n")
+	n1, n2 := r.applyRules(n)
+	result += r.calculateResultSplitRecursive(n1, times)
+	if n2 >= 0 {
+		result += r.calculateResultSplitRecursive(uint(n2), times)
 	}
-	// pf("in %v on top of %v blinks returning %v\n", n, times, result)
+	// pf("in %v on top of %v blinks returning %v  (%v & %v)\n",
+	// 	n, times, result, n1, n2)
 	return
 }
 
-func (r ruleset) applyRules(num int) (result []int) {
-	for i := 0; i < len(r.rules) && result == nil; i++ {
-		var isApplicable bool
-		result, isApplicable = r.rules[i](num)
-		if !isApplicable {
-			result = nil
-		} else {
-			// pf("applied rule %v\n", i)
+func (r ruleset) applyRules(num uint) (n1 uint, n2 int) {
+	var res ruleAppResult
+	for i := 0; i < len(r.rules); i++ {
+		res, n1, n2 = r.rules[i](num)
+		switch res {
+		case ruleres_na:
+			continue
+		case ruleres_n1:
+			n2 = -1
 		}
+		break
 	}
-	if result == nil {
-		// pf("applied fallback\n")
-		result = r.fallbackRule(num)
+	if res == ruleres_na {
+		n1 = r.fallbackRule(num)
+		n2 = -1
 	}
 	return
 }
