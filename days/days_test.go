@@ -108,6 +108,17 @@ MXMXAXMASX`,
 	9: batchTestCase(`2333133121414131402`, "1928", "2858"),
 
 	11: batchTestCase(`125 17`, "55312", ""),
+
+	12: batchTestCase(`RRRRIICCFF
+RRRRIICCCF
+VVRRRCCFFF
+VVRCCCJFFF
+VVVVCJJCFE
+VVIVCCJJEE
+VVIIICJJEE
+MIIIIIJJEE
+MIIISIJEEE
+MMMISSJEEE`, "1930", ""),
 }
 
 func batchTestCase(input, expect1, expect2 string) testCase {
