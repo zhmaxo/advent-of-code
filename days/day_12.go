@@ -13,7 +13,7 @@ func (s *day12Solution) HasData() bool {
 }
 
 func (s *day12Solution) ReadData(reader ioReader) (err error) {
-	s.byteField, err = scanField(reader)
+	s.byteField, err = scanFieldBytesAsIs(reader)
 	return
 }
 

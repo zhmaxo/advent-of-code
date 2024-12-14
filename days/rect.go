@@ -50,7 +50,12 @@ type byteField struct {
 	rect rect
 }
 
-func scanField(reader ioReader) (field byteField, err error) {
+func (f byteField) getValueAt(p posInt) byte {
+	return f.data[p.y][p.x]
+}
+
+func scanFieldFunc(reader ioReader, f func(line []byte, lineIdx int) ([]byte, error),
+) (field byteField, err error) {
 	sc := ProcessReader(reader)
 	defer func() { err = RefineError(err) }()
 
@@ -61,19 +66,28 @@ func scanField(reader ioReader) (field byteField, err error) {
 			break
 		}
 
-		// consistency assurance
-		if field.rect.size.x == 0 {
-			field.rect.size.x = len(line)
-		} else if len(line) != field.rect.size.x {
-			err = fmt.Errorf("inconsistent line lens: %v but expected %v",
-				len(line), field.rect.size.x)
-			return
-		}
-
-		row := make([]byte, len(line))
-		copy(row, line)
+		var row []byte
+		row, err = f(line, field.rect.size.y)
 		field.data = append(field.data, row)
 		field.rect.size.y++
+
+		// consistency assurance
+		if field.rect.size.x == 0 {
+			field.rect.size.x = len(row)
+		} else if len(row) != field.rect.size.x {
+			err = fmt.Errorf("inconsistent line lens: %v but expected %v",
+				len(row), field.rect.size.x)
+			return
+		}
 	}
 	return
+}
+
+func scanFieldBytesAsIs(reader ioReader) (field byteField, err error) {
+	return scanFieldFunc(reader,
+		func(line []byte, _ int) ([]byte, error) {
+			row := make([]byte, len(line))
+			copy(row, line)
+			return row, nil
+		})
 }
