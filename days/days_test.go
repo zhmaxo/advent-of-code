@@ -135,6 +135,19 @@ Prize: X=7870, Y=6450
 Button A: X+69, Y+23
 Button B: X+27, Y+71
 Prize: X=18641, Y=10279`, "480", ""),
+
+	14: batchTestCase(`p=0,4 v=3,-3
+p=6,3 v=-1,-3
+p=10,3 v=-1,2
+p=2,0 v=2,-1
+p=0,0 v=1,3
+p=3,0 v=-2,-2
+p=7,6 v=-1,-3
+p=3,0 v=-1,-2
+p=9,3 v=2,3
+p=7,3 v=-1,2
+p=2,4 v=2,-3
+p=9,5 v=-3,-3`, "12", ""),
 }
 
 func batchTestCase(input, expect1, expect2 string) testCase {
