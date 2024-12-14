@@ -1,16 +1,11 @@
 package days
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"strconv"
 	"strings"
 	"unicode"
-)
-
-type (
-	ioReader = io.Reader
 )
 
 type Solution interface {
@@ -35,11 +30,6 @@ var (
 
 func init() {
 	DaySolutions = make(map[uint8]Solution, 25)
-}
-
-func ProcessReader(reader ioReader) (scanner bufio.Reader) {
-	scanner = *bufio.NewReader(reader)
-	return
 }
 
 func RefineError(readerResultErr error) error {

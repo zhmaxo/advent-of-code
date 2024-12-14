@@ -1,7 +1,6 @@
 package days
 
 import (
-	"fmt"
 	"regexp"
 	"slices"
 	"strconv"
@@ -37,15 +36,6 @@ func (s *day3Solution) HasData() bool {
 func (s *day3Solution) ReadData(reader ioReader) (err error) {
 	s.muls, err = d3_read(reader)
 	return
-}
-
-func pf(f string, a ...any) {
-	fmt.Printf(f, a...)
-}
-
-func plf(f string, a ...any) {
-	fmt.Printf(f, a...)
-	fmt.Println()
 }
 
 func d3_read(reader ioReader) (muls groupedMuls, err error) {
