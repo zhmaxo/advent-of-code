@@ -53,6 +53,14 @@ func ParseNumbers(value string) (result []int, err error) {
 	return ParseNumbersFunc(value, unicode.IsSpace)
 }
 
+func ParseNumbersEachBytes(a ...[]byte) (result []int, err error) {
+	result = make([]int, len(a))
+	for i := 0; i < len(a); i++ {
+		result[i], err = strconv.Atoi(string(a[i]))
+	}
+	return
+}
+
 func ParseNumbersSep(value string, sep rune) (result []int, err error) {
 	return ParseNumbersFunc(value, func(r rune) bool { return r == sep })
 }
