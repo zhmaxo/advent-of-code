@@ -2,7 +2,6 @@ package days
 
 import (
 	"fmt"
-	"strings"
 )
 
 func init() {
@@ -147,41 +146,4 @@ func hasMatch(table [][]byte, value []byte, hdir, vdir seekDir, l, c int) bool {
 
 func isValidIdx[T any](idx int, slice []T) bool {
 	return idx >= 0 && idx < len(slice)
-}
-
-func printRectFunc(rect rect, charFunc func(posInt) rune) {
-	p := rect.topLeft
-	for ; p.y < rect.size.y; p.y++ {
-		for ; p.x < rect.size.x; p.x++ {
-			fmt.Printf("%s", string(charFunc(p)))
-		}
-		fmt.Println()
-		p.x = rect.topLeft.x
-	}
-}
-
-func printTable(table [][]byte, lSince, cSince, vcount, hcount int) {
-	if lSince < 0 || lSince >= len(table) {
-		return
-	}
-	lBefore := lSince + vcount
-	if lBefore >= len(table) {
-		lBefore = len(table)
-	}
-	if cSince < 0 || cSince >= len(table[lSince]) {
-		return
-	}
-	cBefore := cSince + hcount
-	if cBefore >= len(table[lSince]) {
-		cBefore = len(table[lSince])
-	}
-	cIdxs := make([]string, cBefore-cSince)
-	for i := range cIdxs {
-		cIdxs[i] = Stringify(cSince + i)
-	}
-	fmt.Printf(" |%v\n", strings.Join(cIdxs, ""))
-	fmt.Printf("-|%v\n", strings.Repeat("-", cBefore-cSince))
-	for l := lSince; l < lBefore; l++ {
-		fmt.Printf("%v|%s\n", l, table[l][cSince:cBefore])
-	}
 }
