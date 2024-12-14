@@ -70,8 +70,10 @@ func (s *day14Solution) ModifyForTest() {
 func (s *day14Solution) SolvePt1() (answer string, err error) {
 	const ticksToSim = 100
 	// TODO: copy, not change directly
+	moveList := make([]robotMoveInfo, len(s.moveList))
+	copy(moveList, s.moveList)
 	for range ticksToSim {
-		s.simulateTick()
+		s.simulateTick(moveList, s.rect)
 	}
 
 	halfSize := s.rect.size.div(2)
@@ -121,12 +123,12 @@ func (s *day14Solution) SolvePt2() (answer string, err error) {
 	return
 }
 
-func (s *day14Solution) simulateTick() {
-	for i := range s.moveList {
-		ri := s.moveList[i]
+func (_ *day14Solution) simulateTick(moveList []robotMoveInfo, rect rect) {
+	for i := range moveList {
+		ri := moveList[i]
 		// move
 		p := ri.p.add(ri.v)
-		ri.p = s.rect.loopInside(p) // tp if out of bounds
-		s.moveList[i] = ri
+		ri.p = rect.loopInside(p) // tp if out of bounds
+		moveList[i] = ri
 	}
 }
