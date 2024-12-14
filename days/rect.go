@@ -40,9 +40,7 @@ func scanField(reader ioReader) (field byteField, err error) {
 		}
 
 		row := make([]byte, len(line))
-		for i, b := range line {
-			row[i] = b
-		}
+		copy(row, line)
 		field.data = append(field.data, row)
 		field.rect.size.y++
 	}
