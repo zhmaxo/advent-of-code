@@ -20,6 +20,10 @@ func (r rect) contains(p posInt) bool {
 	return true
 }
 
+func (r rect) area() int {
+	return r.size.x * r.size.y
+}
+
 func (r rect) loopInside(p posInt) posInt {
 	if r.size.x < 1 || r.size.y < 1 {
 		// can't loop inside the invalid rect
