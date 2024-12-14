@@ -7,7 +7,7 @@ func init() {
 }
 
 type day6Solution struct {
-	field field
+	field fieldDay6
 }
 
 func (s *day6Solution) HasData() bool {
@@ -102,7 +102,7 @@ func (s *day6Solution) SolvePt2() (answer string, err error) {
 	return
 }
 
-type field struct {
+type fieldDay6 struct {
 	obstacles map[posInt]any
 	actorPos  posInt
 	actorDir  posInt
@@ -121,13 +121,13 @@ type tickResult struct {
 	action actionKind
 }
 
-func (f *field) tick() (result tickResult) {
-	f.actorPos, f.actorDir, result.action = simulateTick(
+func (f *fieldDay6) tick() (result tickResult) {
+	f.actorPos, f.actorDir, result.action = f.simulateTick(
 		f.actorPos, f.actorDir, f.obstacles)
 	return
 }
 
-func simulateTick(pos, dir posInt, obstacles map[posInt]any,
+func (_ fieldDay6) simulateTick(pos, dir posInt, obstacles map[posInt]any,
 ) (nextPos, nextDir posInt, action actionKind) {
 	nextPos, nextDir = pos, dir
 	checkPos := pos.add(dir)
@@ -155,14 +155,14 @@ func wasSavedSameState(pos, dir posInt, m map[posInt]map[posInt]any) bool {
 	return false
 }
 
-func willReturnToPrevPath(f field, visited map[posInt]map[posInt]any) bool {
+func willReturnToPrevPath(f fieldDay6, visited map[posInt]map[posInt]any) bool {
 	simulatelyVisited := make(map[posInt]map[posInt]any, 256)
 	pos, dir := f.actorPos, f.actorDir
 	// what if we turn now
 	dir = dir.rotateRight()
 	var action actionKind
 	for f.rect.contains(pos) {
-		pos, dir, action = simulateTick(pos, dir, f.obstacles)
+		pos, dir, action = f.simulateTick(pos, dir, f.obstacles)
 		if action != step {
 			if simulatelyVisited[pos] == nil {
 				simulatelyVisited[pos] = make(map[posInt]any, 1)
