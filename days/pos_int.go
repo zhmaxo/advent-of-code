@@ -27,6 +27,32 @@ func (p posInt) neg() posInt {
 	return posInt{-p.x, -p.y}
 }
 
+func (p posInt) mul(n int) posInt {
+	p.x *= n
+	p.y *= n
+	return p
+}
+
+func (p posInt) mul2D(n posInt) posInt {
+	p.x *= n.x
+	p.y *= n.y
+	return p
+}
+
+// keep in mind that its all int ops, no fracture
+func (p posInt) div(n int) posInt {
+	p.x /= n
+	p.y /= n
+	return p
+}
+
+// keep in mind that its all int ops, no fracture
+func (p posInt) div2D(n posInt) posInt {
+	p.x /= n.x
+	p.y /= n.y
+	return p
+}
+
 func (p posInt) neighbors() (result [4]posInt) {
 	i := 0
 	for k := range dirNames {

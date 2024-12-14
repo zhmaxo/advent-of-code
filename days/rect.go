@@ -14,6 +14,37 @@ func (r rect) contains(p posInt) bool {
 		return false
 	}
 
+	if br.x <= p.x || br.y <= p.y {
+		return false
+	}
+	return true
+}
+
+func (r rect) loopInside(p posInt) posInt {
+	if r.size.x < 1 || r.size.y < 1 {
+		// can't loop inside the invalid rect
+		return p
+	}
+
+	tl := r.topLeft
+	br := r.size.add(tl)
+
+	for p.x < tl.x {
+		p.x += r.size.x
+	}
+	for p.x >= br.x {
+		p.x -= r.size.x
+	}
+
+	for p.y < tl.y {
+		p.y += r.size.y
+	}
+	for p.y >= br.y {
+		p.y -= r.size.y
+	}
+	return p
+}
+
 type byteField struct {
 	data [][]byte
 	rect rect
