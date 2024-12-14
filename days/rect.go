@@ -6,6 +6,14 @@ type rect struct {
 	topLeft, size posInt
 }
 
+// exclude higher bound
+func (r rect) contains(p posInt) bool {
+	tl := r.topLeft
+	br := r.size.add(tl)
+	if tl.x > p.x || tl.y > p.y {
+		return false
+	}
+
 type byteField struct {
 	data [][]byte
 	rect rect
@@ -39,16 +47,4 @@ func scanField(reader ioReader) (field byteField, err error) {
 		field.rect.size.y++
 	}
 	return
-}
-
-// exclude upper bound
-func (r rect) contains(p posInt) bool {
-	if r.topLeft.x > p.x || r.topLeft.y > p.y {
-		return false
-	}
-
-	if r.size.x <= p.x || r.size.y <= p.y {
-		return false
-	}
-	return true
 }
