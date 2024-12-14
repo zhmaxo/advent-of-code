@@ -43,6 +43,11 @@ func pf(f string, a ...any) {
 	fmt.Printf(f, a...)
 }
 
+func plf(f string, a ...any) {
+	fmt.Printf(f, a...)
+	fmt.Println()
+}
+
 func d3_read(reader ioReader) (muls groupedMuls, err error) {
 	const (
 		startCacheSize = 512
