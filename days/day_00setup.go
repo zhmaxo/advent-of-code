@@ -20,6 +20,10 @@ type Solution interface {
 	SolvePt2() (string, error)
 }
 
+type Tester interface {
+	ModifyForTest()
+}
+
 var (
 	DaySolutions map[uint8]Solution
 

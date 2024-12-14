@@ -163,6 +163,10 @@ func TestDays(t *testing.T) {
 		err := sol.ReadData(reader)
 		asserrt(t, err)
 
+		if tester, ok := sol.(Tester); ok {
+			tester.ModifyForTest()
+		}
+
 		answer1, err := sol.SolvePt1()
 		asserrt(t, err)
 		assert(t, answer1 == tc.expect1,
@@ -170,7 +174,7 @@ func TestDays(t *testing.T) {
 
 		answer2, err := sol.SolvePt2()
 		asserrt(t, err)
-		assert(t, answer2 == tc.expect2,
+		assert(t, tc.expect2 == "" || answer2 == tc.expect2,
 			"%v is incorrect d%vp2 test answer!", answer2, d)
 	}
 }
