@@ -149,6 +149,17 @@ func isValidIdx[T any](idx int, slice []T) bool {
 	return idx >= 0 && idx < len(slice)
 }
 
+func printRectFunc(rect rect, charFunc func(posInt) rune) {
+	p := rect.topLeft
+	for ; p.y < rect.size.y; p.y++ {
+		for ; p.x < rect.size.x; p.x++ {
+			fmt.Printf("%s", string(charFunc(p)))
+		}
+		fmt.Println()
+		p.x = rect.topLeft.x
+	}
+}
+
 func printTable(table [][]byte, lSince, cSince, vcount, hcount int) {
 	if lSince < 0 || lSince >= len(table) {
 		return
