@@ -35,6 +35,13 @@ func (s *day10Solution) SolvePt1() (answer string, err error) {
 }
 
 func (s *day10Solution) SolvePt2() (answer string, err error) {
+	rating := 0
+	for _, p := range s.pathStarters {
+		pathScore := s.calcScore(p, nil)
+		rating += pathScore
+		// plf("path %v has score %v", visited, pathScore)
+	}
+	answer = Stringify(rating)
 	return
 }
 
@@ -65,16 +72,18 @@ func (s *day10Solution) calcScore(start posInt, visited map[posInt]any,
 		return 1
 	}
 	for _, n := range start.neighbors() {
-		if _, beenHere := visited[n]; beenHere {
-			continue
-		}
 		if !s.rect.contains(n) {
 			continue
 		}
 		if !s.canMove(start, n) {
 			continue
 		}
-		visited[n] = s.getValueAt(n)
+		if visited != nil {
+			if _, beenHere := visited[n]; beenHere {
+				continue
+			}
+			visited[n] = s.getValueAt(n)
+		}
 		score += s.calcScore(n, visited)
 	}
 	return
