@@ -172,6 +172,13 @@ func TestUtils(t *testing.T) {
 	assert(t, p1.add(p2).eq(posInt{5, 6}),
 		"unexpected result %v + %v = %v (expected %v)",
 		p1, p2, p1.add(p2), posInt{5, 6})
+
+	md1 := p1.manhDist(p2)
+	md2 := p2.manhDist(p1)
+	// must equals
+	assert(t, md1 == md2, "unexpected manhattan dist between %v and %v: 1->2=%v, 2->1=%v",
+		p1, p2, md1, md2)
+	assert(t, md1 == 5, "somewhy manhattan dist between %v and %v = %v", p1, p2, md1)
 }
 
 func TestDays(t *testing.T) {
