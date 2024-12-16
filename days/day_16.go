@@ -60,11 +60,15 @@ func (s *day16Solution) SolvePt1() (answer string, err error) {
 	possibleTargets := [2]d16MoveNode{
 		targetNodeH, targetNodeV,
 	}
+	result := 0
 	for _, finishNode := range possibleTargets {
 		path, dist, found := astar.Path(startNode, finishNode)
 		if !found {
 			plf("not found path %v -> %v", startNode, finishNode)
 			continue
+		}
+		if result == 0 || result > int(dist) {
+			result = int(dist)
 		}
 		m := make(map[posInt]rune, len(path))
 		for _, p := range path {
@@ -90,6 +94,7 @@ func (s *day16Solution) SolvePt1() (answer string, err error) {
 			return rune(s.getValueAt(p))
 		})
 	}
+	answer = Stringify(result)
 	return
 }
 
