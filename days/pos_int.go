@@ -4,11 +4,29 @@ type posInt struct {
 	x, y int
 }
 
+var (
+	dirUp    = posInt{0, -1}
+	dirRight = posInt{1, 0}
+	dirDown  = posInt{0, 1}
+	dirLeft  = posInt{-1, 0}
+)
+
+var directions = [4]posInt{
+	dirUp, dirRight, dirDown, dirLeft,
+}
+
 var dirNames = map[posInt]string{
-	{1, 0}:  "right",
-	{0, 1}:  "down",
-	{-1, 0}: "left",
-	{0, -1}: "up",
+	dirRight: "right",
+	dirDown:  "down",
+	dirLeft:  "left",
+	dirUp:    "up",
+}
+
+var dirTokens = map[posInt]byte{
+	dirRight: '>',
+	dirDown:  'v',
+	dirLeft:  '<',
+	dirUp:    '^',
 }
 
 func (p posInt) eq(other posInt) bool {
@@ -67,4 +85,26 @@ func (p posInt) rotateRight() posInt {
 	p.x, p.y = -p.y, p.x
 	// not pointer, so original struct is unchanged
 	return p
+}
+
+func (p posInt) rotateLeft() posInt {
+	// 1,0 -> 0,-1 -> -1,0 -> 0,1 -> 1,0
+	p.x, p.y = p.y, -p.x
+	// not pointer, so original struct is unchanged
+	return p
+}
+
+func (p posInt) abs() posInt {
+	if p.x < 0 {
+		p.x *= -1
+	}
+	if p.y < 0 {
+		p.y *= -1
+	}
+	return p
+}
+
+func (p posInt) manhDist(other posInt) uint {
+	d := other.sub(p).abs()
+	return uint(d.x + d.y)
 }
