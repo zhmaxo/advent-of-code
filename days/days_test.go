@@ -200,7 +200,7 @@ p=9,5 v=-3,-3`, "12", ""),
 0,5
 1,6
 2,0
-`, "22", ""),
+`, "22", "6,1"),
 }
 
 func batchTestCase(input, expect1, expect2 string) testCase {

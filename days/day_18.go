@@ -84,6 +84,90 @@ func (s *day18Solution) SolvePt1() (answer string, err error) {
 		return
 	}
 
+	s.printPathInfo(path)
+	answer = Stringify(dist)
+	return
+}
+
+func (s *day18Solution) SolvePt2() (answer string, err error) {
+	const (
+		passable = 0 // in that part obstacle is > 0
+		size     = 71
+	)
+	cleanField := [size][size]byte{}
+	checkField := cleanField
+
+	s.data = make([][]byte, s.rect.size.y)
+	for i := range s.rect.size.y {
+		// now field resets on every checkField = cleanField
+		// and no alloc here!
+		s.data[i] = checkField[i][:s.rect.size.x]
+	}
+
+	start, ok := s.getNode(posInt{0, 0})
+	if !ok {
+		err = fmt.Errorf("unexpected impassable start %v", start)
+		return
+	}
+	finish, ok := s.getNode(s.rect.size.sub(posInt{1, 1}))
+	if !ok {
+		err = fmt.Errorf("unexpected impassable finish %v", finish)
+		return
+	}
+
+	from, to := d18Node{start}, d18Node{finish}
+
+	path, _, found := astar.Path(from, to)
+	if !found {
+		printRectFunc(s.rect, func(p posInt) rune { return rune(s.getValueAt(p)) })
+		return "", fmt.Errorf("invalid data: pathfinding failure before first byte fall")
+	}
+	for i, p := range s.fallingBytes {
+		plf("check byte at %v", p)
+		lastPath := path
+		v := s.getValueAt(p) + 1
+		s.setValueAt(p, v)
+		path, _, found = astar.Path(from, to)
+
+		if !found {
+			plf("falling byte at %v tick", i)
+			s.printPathInfo(lastPath)
+			answer = fmt.Sprintf("%v,%v", p.x, p.y)
+			break
+		}
+	}
+	return
+}
+
+func (s *day18Solution) simulateTick(since, before int) error {
+	step := 1
+	if since > before {
+		step = -1
+	}
+
+	for i := since; i != before; i += step {
+		p := s.fallingBytes[i]
+		v := int8(s.getValueAt(p))
+		v += int8(step)
+		if v < 0 {
+			return fmt.Errorf("unexpected change value at %v: %v -> %v",
+				p, s.getValueAt(p), v)
+		}
+		s.setValueAt(p, byte(v))
+	}
+	return nil
+}
+
+func (s *day18Solution) ModifyForTest() {
+	const (
+		size = 7
+		sims = 12
+	)
+	s.byteField = newField(rect{size: posInt{1, 1}.mul(size)})
+	s.simulateBytes = s.fallingBytes[:sims]
+}
+
+func (s day18Solution) printPathInfo(path []astar.Pather) {
 	m := make(map[posInt]rune, len(path))
 	for _, n := range path {
 		m[n.(d18Node).posInt] = 'O'
@@ -98,22 +182,6 @@ func (s *day18Solution) SolvePt1() (answer string, err error) {
 		}
 		return '.'
 	})
-
-	answer = Stringify(dist)
-	return
-}
-
-func (s *day18Solution) SolvePt2() (answer string, err error) {
-	return
-}
-
-func (s *day18Solution) ModifyForTest() {
-	const (
-		size = 7
-		sims = 12
-	)
-	s.byteField = newField(rect{size: posInt{1, 1}.mul(size)})
-	s.simulateBytes = s.fallingBytes[:sims]
 }
 
 type d18Node struct {

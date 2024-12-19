@@ -64,6 +64,7 @@ func scanFieldBytesAsIs(reader ioReader) (field byteField, err error) {
 
 type walkableField struct {
 	byteField
+	// not sure that "obstacle" field is really needed. need to think again
 	passable, obstacle byte
 }
 
